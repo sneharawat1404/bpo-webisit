@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Suggestions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .chat-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 60%;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .chat-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .user-message, .bot-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .user-message {
+            background-color: #007BFF;
+            color: white;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #f1f1f1;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h2>AI Chatbot Suggestions</h2>
+
+        <div class="chat-box" id="chatBox">
+            <!-- Chat messages will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // Retrieve the claim data from localStorage
+        const claimData = JSON.parse(localStorage.getItem('selectedClaimData')) || {};
+
+        // Define a knowledge base for each project ID
+        const knowledgeBase = {
+            1: {
+                project: "Zata Sales Management",
+                company: "Zata",
+                description: "Managing the sales of the Zata product from inventory to its showroom, including product sales, waste product management, and transportation cost management. The product sales have increased by 60% over 2 years. Transportation costs could be reduced by 30% if the company hires a new transport partner that uses electric cars.",
+                profit: "Product sales have increased by 60% over the last 2 years.",
+                transportationCost: "Transportation costs could be reduced by 30% by hiring a new transport partner that uses electric cars.",
+            },
+            2: {
+                project: "A&Z Customer Management",
+                company: "A&Z",
+                description: "A premium cosmetic company has outsourced its customer management project to MST services to handle customer accounts. Currently, there are 50 refund-related queries under process, of which 23 cannot be traced because the customers did not provide enough evidence. There is also a need to change the company's policies to adapt to new customer demands. The return period should be increased from the current 4-day window to a 7-day window.",
+                refundQueries: "Currently, 50 refund-related queries are under process, out of which 23 could not be traced due to insufficient evidence from the customers.",
+                policyChange: "The return period should be increased to 7 days instead of the current 4-day window.",
+            },
+            3: {
+                project: "Indian Oil Customer Service Application",
+                company: "Indian Oil",
+                description: "This project focuses on enhancing the customer service application for Indian Oil.",
+                profit: "The profit has increased by 30%.",
+                sales: "Sales are expected to increase by 60%, and efforts are being made to double it.",
+            },
+            4: {
+                project: "Energy Distribution Project",
+                company: "Energy Distribution",
+                description: "This project is related to energy distribution systems aimed at optimizing energy distribution across regions.",
+                profit: "Profit has increased by 10%.",
+                sales: "Sales will increase by 25% in Q1 of 2025.",
+            },
+            5: {
+                project: "LP Edtech Call Inquiry Service",
+                company: "LP Edtech",
+                description: "The project is to resolve doubts from prospective students calling to inquire about the institute's fees, environment, etc. 75% of people who take the call inquiry have taken admission into the LP Institute. The project has helped increase profit by 50%, but the service charge has been increased by 5% according to the new policy.",
+                inquiryConversionRate: "75% of people who inquire via call have taken admission in LP Institute.",
+                profitIncrease: "50% of profit has increased due to the call inquiry service.",
+                serviceChargeChange: "The service charge has been increased by 5% due to the new policy.",
+            }
+        };
+
+        // Display the claim data for context
+        const chatBox = document.getElementById('chatBox');
+        const { pid, name, company, query } = claimData;
+
+        // Display claim data in the chat box
+        if (pid) {
+            chatBox.innerHTML += `<div class="bot-message">Project ID: ${pid}</div>`;
+            chatBox.innerHTML += `<div class="bot-message">Stakeholder: ${name}</div>`;
+            chatBox.innerHTML += `<div class="bot-message">Company: ${company}</div>`;
+            chatBox.innerHTML += `<div class="bot-message">Query: ${query}</div>`;
+        }
+
+        // Function to process and respond to the user's query
+        function processQuery(query) {
+            const knowledgeBase = JSON.parse(localStorage.getItem('knowledgeBase')) || {};
+
+            // Extract project ID from the query
+            const pid = extractProjectID(query);
+
+            // Default response if no project is matched
+            let response = "I'm sorry, I don't have the information for that.";
+
+            if (pid && knowledgeBase[pid]) {
+                const projectInfo = knowledgeBase[pid];
+
+                // Handle query based on the available project information
+                if (query.includes("profit")) {
+                    response = projectInfo.profit || "Profit information is not available for this project.";
+                } else if (query.includes("sales")) {
+                    response = projectInfo.sales || "Sales information is not available for this project.";
+                } else if (query.includes("transportation cost")) {
+                    response = projectInfo.transportationCost || "Transportation cost details are not available for this project.";
+                } else if (query.includes("refund")) {
+                    response = projectInfo.refundQueries || "Refund query details are not available for this project.";
+                } else if (query.includes("policy change")) {
+                    response = projectInfo.policyChange || "There is no information on policy changes for this project.";
+                } else {
+                    response = "Could you clarify your query? I can help with profit, sales, transportation costs, refund, or policy change information.";
+                }
+            } else {
+                response = "Could not find the project based on your query. Please check if the project name is correct.";
+            }
+
+            return response;
+        }
+
+        // Extract the project ID based on keywords in the query
+        function extractProjectID(query) {
+            if (query.toLowerCase().includes('zata')) {
+                return 1;
+            } else if (query.toLowerCase().includes('a&z')) {
+                return 2;
+            } else if (query.toLowerCase().includes('indian oil')) {
+                return 3;
+            } else if (query.toLowerCase().includes('energy distribution')) {
+                return 4;
+            } else if (query.toLowerCase().includes('lp edtech')) {
+                return 5;
+            }
+            return null; // If no project is found
+        }
+
+        // Auto response function
+        function autoRespond() {
+            const response = processQuery(query);
+
+            // Display the bot's response
+            chatBox.innerHTML += `<div class="bot-message">${response}</div>`;
+
+            // Scroll to the bottom of the chat box
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Trigger the automatic response when the page loads
+        window.onload = autoRespond;
+
+    </script>
+
+</body>
+</html>

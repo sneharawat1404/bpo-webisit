@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claims Processing Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #FFFAEC;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            
+        }
+        .form-container, .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin: 10px 0;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-row label {
+            flex: 1;
+            font-weight: bold;
+        }
+        .form-row input[type="text"], 
+        .form-row textarea {
+            flex: 2;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #6699CC;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+            button:hover {
+                background-color: #6699CC;
+            }
+        .voice-input-btn {
+            padding: 10px 20px;
+            background-color: #ffd014;
+            color: rgb(35, 24, 22);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .voice-input-btn:hover {
+            background-color: #cfe036;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #a0c4ff;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2 style="text-align: center; color: black">Claim Processing Form</h2>
+        <form id="claimsForm">
+            <div class="form-row">
+                <label for="name">Stakeholder Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your Name" required>
+            </div>
+            <div class="form-row">
+                <label for="company">Company Name</label>
+                <input type="text" id="company" name="company" placeholder="Enter your Company" required>
+            </div>
+            <div class="form-row">
+                <label for="pid">Project ID</label>
+                <input type="text" id="pid" name="pid" placeholder="Enter your PID" required>
+            </div>
+            <div class="form-row">
+                <label for="query">Query</label>
+                <textarea id="query" name="query" placeholder="Enter your Query" required></textarea>
+                <button type="button" class="voice-input-btn" onclick="startVoiceInput()">Voice Input</button>
+            </div>
+            <button type="button" onclick="addData()">Add Data</button>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <h3 style="text-align: center; color: black">Enquiry Details</h3>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Project ID</th>
+                    <th>Stakeholder Name</th>
+                    <th>Company Name</th>
+                    <th>Query</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added here -->
+            </tbody>
+        </table>
+        <button onclick="submitAll()">Submit All</button>
+    </div>
+
+    <script>
+        const tableBody = document.querySelector('#dataTable tbody');
+
+        // Initialize Speech Recognition API
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        function startVoiceInput() {
+            recognition.start();
+        }
+
+        // When speech is recognized, populate the textarea with the speech
+        recognition.onresult = function(event) {
+            const query = document.getElementById('query');
+            query.value = event.results[0][0].transcript;
+        };
+
+        // Handle error in speech recognition
+        recognition.onerror = function(event) {
+            alert('Error occurred in speech recognition: ' + event.error);
+        };
+
+        function addData() {
+            // Get form values
+            const name = document.getElementById('name').value;
+            const company = document.getElementById('company').value;
+            const pid = document.getElementById('pid').value;
+            const query = document.getElementById('query').value;
+
+            // Validate data
+            if (!name || !company || !pid || !query) {
+                alert('Please fill in all fields before adding data.');
+                return;
+            }
+
+            // Add a new row to the table
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${pid}</td>
+                <td>${name}</td>
+                <td>${company}</td>
+                <td>${query}</td>
+            `;
+            tableBody.appendChild(newRow);
+
+            // Clear the form for the next entry
+            document.getElementById('claimsForm').reset();
+        }
+
+        function submitAll() {
+            // Collect all data from the table
+            const rows = tableBody.querySelectorAll('tr');
+            const data = Array.from(rows).map(row => {
+                const cells = row.querySelectorAll('td');
+                return {
+                    pid: cells[0].textContent,
+                    name: cells[1].textContent,
+                    company: cells[2].textContent,
+                    query: cells[3].textContent,
+                };
+            });
+
+            localStorage.setItem('claimsData', JSON.stringify(data));
+
+            // Redirect to the new page for processing
+            window.location.href = 'server-side.html';
+        }
+    </script>
+</body>
+</html>

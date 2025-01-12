@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enquiries Record</title>
+    <style>
+        /* Same styles as before */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #a0c4ff;
+            color: black;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        .angry {
+            background-color: #ffcccc; /* Light red for angry sentiment */
+        }
+        .appointment-yes {
+            background-color: #ffff99; /* Light yellow for appointment yes */
+        }
+        .action-btn, .ai-suggest-btn {
+            padding: 8px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .action-btn:hover, .ai-suggest-btn:hover {
+            background-color: #218838;
+        }
+        .calendar {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center; color: black">Enquiries Record</h2>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Project ID</th>
+                    <th>Stakeholder Name</th>
+                    <th>Company Name</th>
+                    <th>Query</th>
+                    <th>Sentiment</th>
+                    <th>Appointment</th>
+                    <th>Action</th>
+                    <th>Suggestions</th> <!-- New Suggestions column -->
+                </tr>
+            </thead>
+            <tbody id="dataTableBody">
+                <!-- Data rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Retrieve data from localStorage
+        const data = JSON.parse(localStorage.getItem('claimsData')) || [];
+
+        // Function to analyze sentiment (improved)
+        function analyzeSentiment(query) {
+            const lowerQuery = query.toLowerCase();
+
+            // Angry sentiment words
+            if (lowerQuery.includes("angry") || lowerQuery.includes("frustrated") || lowerQuery.includes("insane") ||
+                lowerQuery.includes("rage") || lowerQuery.includes("furious") || lowerQuery.includes("irritated") ||
+                lowerQuery.includes("enraged") || lowerQuery.includes("annoyed") || lowerQuery.includes("mad") ||
+                lowerQuery.includes("hostile")) {
+                return "Angry";
+            }
+
+            // Happy sentiment words
+            else if (lowerQuery.includes("happy") || lowerQuery.includes("satisfied") || lowerQuery.includes("good") ||
+                lowerQuery.includes("joyful") || lowerQuery.includes("excited") || lowerQuery.includes("content") ||
+                lowerQuery.includes("cheerful") || lowerQuery.includes("pleased") || lowerQuery.includes("elated") ||
+                lowerQuery.includes("blessed") || lowerQuery.includes("grateful") || lowerQuery.includes("optimistic")) {
+                return "Happy";
+            }
+
+            // Sad sentiment words
+            else if (lowerQuery.includes("sad") || lowerQuery.includes("upset") || lowerQuery.includes("disappointed") ||
+                lowerQuery.includes("mournful") || lowerQuery.includes("depressed") || lowerQuery.includes("down") ||
+                lowerQuery.includes("gloomy") || lowerQuery.includes("hopeless") || lowerQuery.includes("blue") ||
+                lowerQuery.includes("heartbroken") || lowerQuery.includes("melancholy") || lowerQuery.includes("lonely")) {
+                return "Sad";
+            }
+
+            // Neutral sentiment
+            return "Neutral"; // Default sentiment
+        }
+
+
+        // Function to determine if an appointment is needed (improved)
+        function checkAppointment(query) {
+            const lowerQuery = query.toLowerCase();
+
+            // Words indicating an appointment or a need to schedule something
+            if (lowerQuery.includes("follow-up") || lowerQuery.includes("call") || lowerQuery.includes("meeting") ||
+                lowerQuery.includes("schedule") || lowerQuery.includes("arrange") || lowerQuery.includes("appointment") ||
+                lowerQuery.includes("call back") || lowerQuery.includes("contact later") || lowerQuery.includes("call you") ||
+                lowerQuery.includes("speak with you") || lowerQuery.includes("reach out") || lowerQuery.includes("set up") ||
+                lowerQuery.includes("schedule a call") || lowerQuery.includes("arrange a call") || lowerQuery.includes("call after") ||
+                lowerQuery.includes("follow up with") || lowerQuery.includes("talk later")) {
+                return "Yes";
+            }
+
+            return "No"; // Default value when no appointment-related context is found
+        }
+
+
+        // Function to create the calendar input for booking appointments
+        function createCalendar() {
+            return `<input type="date" class="calendar" />`;
+        }
+
+        // Populate the table with data and add sentiment and appointment columns
+        const tableBody = document.getElementById('dataTableBody');
+        data.forEach(item => {
+            const sentiment = analyzeSentiment(item.query);
+            const appointment = checkAppointment(item.query);
+            const isAngry = sentiment === "Angry" ? "angry" : "";
+            const isAppointmentYes = appointment === "Yes" ? "appointment-yes" : "";
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.pid}</td>
+                <td>${item.name}</td>
+                <td>${item.company}</td>
+                <td>${item.query}</td>
+                <td class="${isAngry}">${sentiment}</td>
+                <td class="${isAppointmentYes}">${appointment}</td>
+                <td><button class="action-btn" onclick="bookAppointment('${item.pid}')">Book Appointment</button>${createCalendar()}</td>
+                <td><button class="ai-suggest-btn" onclick="openAIChat('${item.pid}', '${item.name}', '${item.company}', '${item.query}')">AI Suggestion</button></td> <!-- AI Suggestion Button -->
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Function to handle appointment booking
+        function bookAppointment(pid) {
+            alert(`Appointment booking for Project ID: ${pid}`);
+        }
+
+        // Function to open AI Suggestion and pass data to new page
+        function openAIChat(pid, name, company, query) {
+            // Store the selected data in localStorage for the new page
+            const claimData = { pid, name, company, query };
+            localStorage.setItem('selectedClaimData', JSON.stringify(claimData));
+
+            // Redirect to the new page with the AI Chatbot
+            window.location.href = 'chatbot-kb.html'; // Assuming ai-chatbot.html is the new page
+        }
+    </script>
+</body>
+</html>
