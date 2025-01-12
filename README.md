@@ -3,7 +3,7 @@
 ---
 
 #### **Project Overview**  
-This project focuses on developing an AI-powered system for claims processing in the BPO industry. The solution aims to streamline workflows by automating routine tasks, prioritizing callbacks and follow-ups, analyzing client sentiment, and providing quick access to relevant information through an updated knowledge base. This ensures improved efficiency, enhanced client experience, and increased productivity for agents.  
+This project focuses on developing a prototype to show the need of  AI-powered system for claims processing in the BPO industry. The solution aims to streamline workflows by automating routine tasks, prioritizing callbacks and follow-ups, analyzing client sentiment, and providing quick access to relevant information through an updated knowledge base. This ensures improved efficiency, enhanced client experience, and increased productivity for agents.  
 
 ---
 
