@@ -1,3 +1,10 @@
+
+
+
+
+https://github.com/user-attachments/assets/47556a85-ade2-4bc8-b305-1d8fdb30ba7b
+
+
 ### **README: AI-Powered Claims Processing Solution**  
 
 ---
